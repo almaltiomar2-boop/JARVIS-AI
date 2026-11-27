@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J.A.R.V.I.S AI</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: monospace;
+        }
+        #jarvis-ui {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #00e5ff;
+            pointer-events: none;
+        }
+        h1 {
+            font-size: 2rem;
+            letter-spacing: 5px;
+            text-shadow: 0 0 20px #00e5ff;
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 1rem;
+            color: #00e5ff;
+            opacity: 0.7;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- واجهة النصوص -->
+    <div id="jarvis-ui">
+        <h1>J.A.R.V.I.S</h1>
+        <p>SYSTEM ONLINE...</p>
+    </div>
+
+    <!-- استدعاء مكتبة Three.js للرسم ثلاثي الأبعاد -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // إعداد المشهد ثلاثي الأبعاد
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // إنشاء الكرة المركزية (تمثل نواة جارفيس)
+        const geometry = new THREE.SphereGeometry(1.5, 32, 32);
+        const material = new THREE.MeshBasicMaterial({ 
+            color: 0x00e5ff, 
+            wireframe: true,
+            transparent: true,
+            opacity: 0.3
+        });
+        const sphere = new THREE.Mesh(geometry, material);
+        scene.add(sphere);
+
+        // إنشاء حلقات جارفيس الدوارة
+        const rings = [];
+        for (let i = 0; i < 3; i++) {
+            const ringGeo = new THREE.TorusGeometry(2.5 + (i * 0.5), 0.02, 16, 100);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            // تدوير الحلقات بزوايا مختلفة
+            ring.rotation.x = Math.random() * Math.PI;
+            ring.rotation.y = Math.random() * Math.PI;
+            scene.add(ring);
+            rings.push(ring);
+        }
+
+        // إضافة تأثير النجوم في الخلفية (هولوغرام)
+        const starsGeo = new THREE.BufferGeometry();
+        const starsCount = 2000;
+        const posArray = new Float32Array(starsCount * 3);
+        for(let i = 0; i < starsCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 10;
+        }
+        starsGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const starsMat = new THREE.PointsMaterial({ color: 0x00e5ff, size: 0.02 });
+        const stars = new THREE.Points(starsGeo, starsMat);
+        scene.add(stars);
+
+        // وضع الكاميرا
+        camera.position.z = 6;
+
+        // حركة الدوران (الأنيميشن)
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // دوران الكرة المركزية
+            sphere.rotation.y += 0.005;
+            sphere.rotation.x += 0.002;
+
+            // دوران الحلقات بسرعات مختلفة
+            rings.forEach((ring, index) => {
+                ring.rotation.x += 0.01 * (index + 1);
+                ring.rotation.y += 0.005 * (index + 1);
+            });
+
+            // دوران النجوم ببطء
+            stars.rotation.y -= 0.001;
+
+            renderer.render(scene, camera);
+        }
+
+        // بدء الأنيميشن
+        animate();
+
+        // جعل الواجهة متجاوبة مع حجم الشاشة
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
