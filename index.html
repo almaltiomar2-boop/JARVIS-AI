@@ -10,15 +10,24 @@
             overflow: hidden;
             background-color: #000;
             font-family: monospace;
-        }
-        #jarvis-ui {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
             color: #00e5ff;
-            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        .ui-container {
+            text-align: center;
+            z-index: 10;
+            margin-top: auto;
+            margin-bottom: 50px;
         }
         h1 {
             font-size: 2rem;
@@ -26,108 +35,161 @@
             text-shadow: 0 0 20px #00e5ff;
             margin-bottom: 10px;
         }
-        p {
+        #status {
             font-size: 1rem;
-            color: #00e5ff;
             opacity: 0.7;
-            animation: pulse 2s infinite;
+            margin-bottom: 20px;
+            height: 20px;
+        }
+        #mic-btn {
+            background: transparent;
+            border: 2px solid #00e5ff;
+            color: #00e5ff;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 0 15px #00e5ff;
+            transition: all 0.3s;
+        }
+        #mic-btn.listening {
+            background: #00e5ff;
+            color: #000;
+            box-shadow: 0 0 30px #00e5ff;
+            animation: pulse 1s infinite;
         }
         @keyframes pulse {
-            0% { opacity: 0.3; }
-            50% { opacity: 1; }
-            100% { opacity: 0.3; }
-        }
-        canvas {
-            display: block;
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
     </style>
 </head>
 <body>
 
-    <!-- واجهة النصوص -->
-    <div id="jarvis-ui">
+    <div class="ui-container">
         <h1>J.A.R.V.I.S</h1>
-        <p>SYSTEM ONLINE...</p>
+        <div id="status">SYSTEM ONLINE...</div>
+        <button id="mic-btn">🎤</button>
     </div>
 
-    <!-- استدعاء مكتبة Three.js للرسم ثلاثي الأبعاد -->
+    <!-- مكتبة الرسم 3D -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        // إعداد المشهد ثلاثي الأبعاد
+        // --- إعداد الرسم ثلاثي الأبعاد ---
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // إنشاء الكرة المركزية (تمثل نواة جارفيس)
         const geometry = new THREE.SphereGeometry(1.5, 32, 32);
-        const material = new THREE.MeshBasicMaterial({ 
-            color: 0x00e5ff, 
-            wireframe: true,
-            transparent: true,
-            opacity: 0.3
-        });
+        const material = new THREE.MeshBasicMaterial({ color: 0x00e5ff, wireframe: true, transparent: true, opacity: 0.3 });
         const sphere = new THREE.Mesh(geometry, material);
         scene.add(sphere);
 
-        // إنشاء حلقات جارفيس الدوارة
         const rings = [];
         for (let i = 0; i < 3; i++) {
             const ringGeo = new THREE.TorusGeometry(2.5 + (i * 0.5), 0.02, 16, 100);
             const ringMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff });
             const ring = new THREE.Mesh(ringGeo, ringMat);
-            // تدوير الحلقات بزوايا مختلفة
             ring.rotation.x = Math.random() * Math.PI;
             ring.rotation.y = Math.random() * Math.PI;
             scene.add(ring);
             rings.push(ring);
         }
 
-        // إضافة تأثير النجوم في الخلفية (هولوغرام)
-        const starsGeo = new THREE.BufferGeometry();
-        const starsCount = 2000;
-        const posArray = new Float32Array(starsCount * 3);
-        for(let i = 0; i < starsCount * 3; i++) {
-            posArray[i] = (Math.random() - 0.5) * 10;
-        }
-        starsGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-        const starsMat = new THREE.PointsMaterial({ color: 0x00e5ff, size: 0.02 });
-        const stars = new THREE.Points(starsGeo, starsMat);
-        scene.add(stars);
-
-        // وضع الكاميرا
         camera.position.z = 6;
 
-        // حركة الدوران (الأنيميشن)
         function animate() {
             requestAnimationFrame(animate);
-            
-            // دوران الكرة المركزية
             sphere.rotation.y += 0.005;
             sphere.rotation.x += 0.002;
-
-            // دوران الحلقات بسرعات مختلفة
             rings.forEach((ring, index) => {
                 ring.rotation.x += 0.01 * (index + 1);
                 ring.rotation.y += 0.005 * (index + 1);
             });
-
-            // دوران النجوم ببطء
-            stars.rotation.y -= 0.001;
-
             renderer.render(scene, camera);
         }
-
-        // بدء الأنيميشن
         animate();
 
-        // جعل الواجهة متجاوبة مع حجم الشاشة
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
+
+        // --- منطق الصوت والتفاعل (J.A.R.V.I.S) ---
+        const micBtn = document.getElementById('mic-btn');
+        const statusDiv = document.getElementById('status');
+        
+        // دعم المتصفحات للتعرف على الصوت
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.lang = 'ar-SA'; // اللغة العربية
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = () => {
+                micBtn.classList.add('listening');
+                statusDiv.innerText = "أنا أسمعك الآن...";
+            };
+
+            recognition.onresult = (event) => {
+                const speechResult = event.results[0][0].transcript;
+                statusDiv.innerText = `قلت: ${speechResult}`;
+                processCommand(speechResult);
+            };
+
+            recognition.onerror = (event) => {
+                statusDiv.innerText = "لم أفهم، حاول مرة أخرى.";
+                micBtn.classList.remove('listening');
+            };
+
+            recognition.onend = () => {
+                micBtn.classList.remove('listening');
+            };
+        } else {
+            statusDiv.innerText = "متصفحك لا يدعم المايكروفون.";
+        }
+
+        micBtn.addEventListener('click', () => {
+            if (recognition) {
+                recognition.start();
+            }
+        });
+
+        // دالة معالجة الأوامر ورد JARVIS
+        function processCommand(command) {
+            // هنا نضع العقل المبدئي (سنربطه بملف بايثون لاحقاً)
+            let response = "";
+            
+            if (command.includes("مرحبا") || command.includes("أهلا")) {
+                response = "مرحباً بك. أنا جارفيس، مساعدك الذكي. كيف يمكنني خدمتك؟";
+            } else if (command.includes("اسمك")) {
+                response = "اسمي جارفيس، نظام ذكاء اصطناعي متطور.";
+            } else if (command.includes("الحالة")) {
+                response = "جميع الأنظمة تعمل بكفاءة عالية.";
+            } else {
+                response = "لقد سمعتك تقول: " + command + ". لكن عقلي المركزي لا يزال قيد التطوير.";
+            }
+
+            speakResponse(response);
+        }
+
+        // دالة النطق (الفم)
+        function speakResponse(text) {
+            statusDiv.innerText = text;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ar-SA';
+            utterance.rate = 1.0;
+            utterance.pitch = 0.8; // صوت أعمق قليلاً ليشبه جارفيس
+            window.speechSynthesis.speak(utterance);
+        }
     </script>
 </body>
 </html>
