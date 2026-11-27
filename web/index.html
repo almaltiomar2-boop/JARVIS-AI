@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#050b12">
+    <meta name="description" content="واجهة J.A.R.V.I.S. العربية — اتصال حي بخادم المساعد.">
+    <title>J.A.R.V.I.S. — مركز القيادة</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script type="module" src="./app.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="./" aria-label="J.A.R.V.I.S. الصفحة الرئيسية">
+          <span class="brand-mark" aria-hidden="true">J</span>
+          <span>
+            <strong>J.A.R.V.I.S.</strong>
+            <small>مركز القيادة الذكي</small>
+          </span>
+        </a>
+
+        <div class="topbar-meta">
+          <div class="system-state">
+            <span class="status-dot" id="status-dot" aria-hidden="true"></span>
+            <span id="connection-label">جارٍ فحص الاتصال</span>
+          </div>
+          <time id="local-time" aria-label="الوقت المحلي">--:--:--</time>
+        </div>
+      </header>
+
+      <main>
+        <section class="dashboard" aria-label="لوحة حالة JARVIS">
+          <aside class="side-column side-column-start">
+            <section class="glass-card telemetry-card">
+              <div class="card-heading">
+                <span class="eyebrow">الاتصال</span>
+                <span class="card-index">01</span>
+              </div>
+              <div class="metric-line">
+                <span class="metric-label">الخادم</span>
+                <strong id="server-state">غير متصل</strong>
+              </div>
+              <div class="metric-line">
+                <span class="metric-label">زمن الاستجابة</span>
+                <strong><span id="latency">—</span><small> ms</small></strong>
+              </div>
+              <div class="metric-line">
+                <span class="metric-label">آخر فحص</span>
+                <strong id="last-check">—</strong>
+              </div>
+              <div class="meter-track" aria-hidden="true">
+                <span class="meter-fill" id="connection-meter"></span>
+              </div>
+              <p class="card-note">الزمن مقاس من هذا المتصفح إلى واجهة الخادم.</p>
+            </section>
+
+            <section class="glass-card core-card">
+              <div class="card-heading">
+                <span class="eyebrow">حالة النواة</span>
+                <span class="pulse-mark" aria-hidden="true"></span>
+              </div>
+              <div class="core-indicator" id="core-indicator">
+                <span class="core-light" aria-hidden="true"></span>
+                <div>
+                  <strong id="brain-state">قواعد محلية</strong>
+                  <small id="brain-detail">لا يوجد نموذج ذكاء اصطناعي موصول</small>
+                </div>
+              </div>
+              <p class="card-note">لن تظهر النواة كذكاء متصل قبل إعداد نموذج فعلي.</p>
+            </section>
+
+            <section class="glass-card privacy-card">
+              <div class="privacy-icon" aria-hidden="true">◈</div>
+              <div>
+                <strong>الميكروفون بإذنك</strong>
+                <p>لا يبدأ الاستماع إلا عند ضغط زر الصوت، وقد يعالج المتصفح الصوت عبر خدمته.</p>
+              </div>
+            </section>
+          </aside>
+
+          <section class="visual-column" aria-label="تصور ثلاثي الأبعاد">
+            <div class="visual-heading">
+              <span>واجهة تفاعلية</span>
+              <span class="visual-divider"></span>
+              <span id="render-state">تهيئة المشهد</span>
+            </div>
+
+            <div class="scene-frame">
+              <canvas id="scene" aria-label="خوذة رقمية وحلقات مدارية ومجسم أرضي متحرك"></canvas>
+              <div class="scene-fallback" id="scene-fallback" hidden>
+                <div class="fallback-orbit orbit-one"></div>
+                <div class="fallback-orbit orbit-two"></div>
+                <div class="fallback-core">J</div>
+                <span>المشهد ثلاثي الأبعاد غير متاح في هذا المتصفح</span>
+              </div>
+              <div class="scene-overlay scene-overlay-top">
+                <span class="scene-tag">J.A.R.V.I.S. / CORE</span>
+                <span class="scene-coordinates" id="scene-clock">LOCAL / --:--</span>
+              </div>
+              <div class="scene-overlay scene-overlay-bottom">
+                <span>المنظومة البصرية</span>
+                <span class="scene-live"><i></i> <b id="scene-live-label">بانتظار الاتصال</b></span>
+              </div>
+              <div class="scene-crosshair" aria-hidden="true">+</div>
+            </div>
+
+            <div class="visual-caption">
+              <span class="caption-line"></span>
+              <p>كل حركة في المشهد مرئية؛ مؤشرات الحالة مأخوذة من اتصال حقيقي بالخادم.</p>
+              <span class="caption-line"></span>
+            </div>
+          </section>
+
+          <aside class="side-column side-column-end">
+            <section class="glass-card earth-card">
+              <div class="card-heading">
+                <span class="eyebrow">المجسم الأرضي</span>
+                <span class="card-index">03</span>
+              </div>
+              <div class="earth-preview" aria-hidden="true">
+                <div class="earth-orbit"></div>
+                <div class="earth-sphere">
+                  <span class="earth-grid"></span>
+                  <span class="earth-continent continent-a"></span>
+                  <span class="earth-continent continent-b"></span>
+                </div>
+                <span class="earth-signal signal-a"></span>
+                <span class="earth-signal signal-b"></span>
+              </div>
+              <div class="metric-line">
+                <span class="metric-label">حالة التصور</span>
+                <strong id="scene-status">جاهز للعرض</strong>
+              </div>
+              <p class="card-note">مجسم بصري متحرك؛ لا يعرض موقعًا جغرافيًا حيًا.</p>
+            </section>
+
+            <section class="glass-card voice-card">
+              <div class="card-heading">
+                <span class="eyebrow">الصوت</span>
+                <span class="card-index">04</span>
+              </div>
+              <div class="voice-state">
+                <span class="voice-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+                <strong id="voice-state">الصوت غير مفحوص</strong>
+              </div>
+              <p class="card-note" id="voice-note">الإملاء الصوتي يعتمد على دعم المتصفح وإذنه.</p>
+              <button class="text-button" id="voice-output-toggle" type="button" aria-pressed="false">
+                <span class="toggle-indicator" aria-hidden="true"></span>
+                الرد الصوتي متوقف
+              </button>
+            </section>
+          </aside>
+        </section>
+
+        <section class="assistant-panel" aria-label="المحادثة مع JARVIS">
+          <div class="assistant-panel-heading">
+            <div>
+              <span class="eyebrow">قناة الأوامر</span>
+              <h1>تحدث مع J.A.R.V.I.S.</h1>
+            </div>
+            <p class="channel-hint">الأوامر تُرسل إلى API المشروع الحالي</p>
+          </div>
+
+          <div class="message-list" id="messages" aria-live="polite" aria-relevant="additions">
+            <article class="message message-system">
+              <span class="message-avatar" aria-hidden="true">J</span>
+              <div class="message-body">
+                <span class="message-label">النظام</span>
+                <p>الواجهة جاهزة. النواة الحالية ترد بقواعد نصية بسيطة؛ لم يتم توصيل نموذج ذكاء اصطناعي بعد.</p>
+              </div>
+            </article>
+          </div>
+
+          <form class="command-form" id="command-form">
+            <button class="icon-button mic-button" id="mic-button" type="button" aria-label="إملاء صوتي" title="إملاء صوتي">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3Z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3m-4 0h8"/></svg>
+            </button>
+            <label class="sr-only" for="command-input">اكتب أمرك</label>
+            <input id="command-input" name="command" type="text" maxlength="2000" autocomplete="off" placeholder="اكتب أمرك هنا..." required>
+            <button class="send-button" id="send-button" type="submit">
+              <span>إرسال</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 14-7-4 14-3-6-7-1Z"/><path d="m12 13 7-8"/></svg>
+            </button>
+          </form>
+          <div class="form-footer">
+            <span id="form-status">اتصال آمن عبر نفس الخادم</span>
+            <span><kbd>Enter</kbd> للإرسال</span>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer-bar">
+        <span>J.A.R.V.I.S. <b>CORE</b></span>
+        <span>واجهة ويب متجاوبة · الإصدار الأساسي</span>
+        <a href="/docs" target="_blank" rel="noreferrer">توثيق API <span aria-hidden="true">↗</span></a>
+      </footer>
+    </div>
+  </body>
+</html>
